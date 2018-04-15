@@ -41,6 +41,8 @@ class RequestDebugDecorator(object):
             logger = args[0].logger
             request = args[1]
             logger.debug('{0}: {1}'.format(action, request))
+            if action in ('POST', 'PUT', 'PATCH'):
+                logger.debug('Payload: {}'.format(args[2]))
             result = f(*args)
             status_code = result.status_code
             logger.debug('Response Code: {0}'.format(status_code))
