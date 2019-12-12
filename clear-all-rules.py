@@ -1,6 +1,7 @@
 # import required dependencies
 from __future__ import print_function
 from fireREST import FireREST
+import os
 
 # Set variables for execution.
 # Make sure your credentials are correct.
@@ -12,16 +13,14 @@ username = os.environ["username"]
 password = os.environ["password"]
 domain = os.environ["domain"]
 ac_policy = os.environ["ac_policy"]
-intrusion_policy = os.environ["intrusion_policy"]
-variable_set = os.environ["variable_set"]
 
 # Inspection settings
 #  Leave variable empty (var = '') if you don't want to include the setting
-#intrusion_policy = 'IPS TEST'
+intrusion_policy = ''
 #file_policy = 'api-file-policy'
 file_policy = ''
 #variable_set = 'api-variable-set'
-#variable_set = 'Lab_Variables'
+variable_set = ''
 
 # Logging settings
 #  Leave variable empty (var = '') if you don't want to include the setting
@@ -129,7 +128,8 @@ for response in acp_rules:
             }
         else:
             print('  File Policy configuration already exists, or not specified. Skipping file policy configuration.')
-        if variable_set:
+
+        if variable_set and 'variableSet' not in acp_rule:
             # Set IPS policy config
             payload['variableSet'] = {
                 "id": variable_set_id
@@ -137,28 +137,19 @@ for response in acp_rules:
         else:
             print('  Variable Set configuration already exists, or not specified. Skipping variable set.')
 
-
-#        if variable_set and 'variableSet' not in acp_rule:
-#            # Set IPS policy config
-#            payload['variableSet'] = {
-#                "id": variable_set_id
-#            }
-#        else:
-#            print('  Variable Set configuration already exists, or not specified. Skipping variable set.')
-#
         # Remove metadata fields from existing rule. This is required since the API does not support
         # PATCH operations as of version 6.2.1 of FMC. That's why we have to delete metadata before we use a PUT
         # operation to change our ACP rule.
 
         # Check if rule action is ALLOW. If not, intrusion settings will not work and it can't be logged at end.
         #  If this is true, overwrite defined settings.
-        if payload['action'] != 'ALLOW':
+        if payload['action'] != 'BLOCK':
             print('  Rule not set to ALLOW, clearing intrusion settings. Overwriting log settings with log at '
                   'beginning and send to event viewer.')
 
             # Overwrite logging settings (syslog server will remain if it was defined)
-            payload['sendEventsToFMC'] = 'true'
-            payload['logBegin'] = 'true'
+            payload['sendEventsToFMC'] = 'false'
+            payload['logBegin'] = 'false'
             payload['logEnd'] = 'false'
 
             # Clear inspection settings.

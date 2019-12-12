@@ -4,18 +4,21 @@ from fireREST import FireREST
 
 # Set variables for execution.
 # Make sure your credentials are correct.
-device = '10.12.100.36'
-username = 'api-user'
-password = 'api-password'
-# With child domain (note the spacing):
-# domain = 'Global/ NAME-OF-CHILD'
-domain = 'Global'
-ac_policy = 'api-test-policy'
+
+## Lab FMC and user
+device = os.environ["device"]
+username = os.environ["username"]
+password = os.environ["password"]
+domain = os.environ["domain"]
+ac_policy = os.environ["ac_policy"]
+api = FireREST(hostname=device, username=username, password=password, domain=domain)
+
+## Global Domain Test
+#domain = 'Global'
+#ac_policy = 'december-hackathon-global-acp'
+#api = FireREST(hostname=device, username=username, password=password)
 
 policyFile = open(ac_policy + ".csv", "w")
-
-# Initialize a new api object
-api = FireREST(hostname=device, username=username, password=password)
 
 # Get IDs for specified objects. API PK = UUID, so we have to find the matching api object for the name specified.
 if ac_policy:
